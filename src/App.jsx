@@ -101,6 +101,10 @@ export default function App() {
     setter(prev => (prev.includes(key) ? prev : [...prev, key]));
   };
 
+  const removePlayer = (key, setter) => {
+    setter(prev => prev.filter(k => k !== key));
+  };
+
   /* =========================
      Scoring Engine
   ========================= */
@@ -184,29 +188,42 @@ export default function App() {
         Fantasy Hockey Trade Analyzer (3-Team)
       </h1>
 
-      <input type="file" accept=".csv" onChange={handleCSVUpload} />
+      <div className="mb-4">
+        <input 
+          type="file" 
+          accept=".csv" 
+          onChange={handleCSVUpload}
+          className="border p-2 rounded"
+        />
+        {players.length > 0 && (
+          <span className="ml-4 text-green-600">
+            ✓ {players.length} players loaded
+          </span>
+        )}
+      </div>
 
       <div className="my-4">
-        <label>
+        <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={playoffFocus}
             onChange={() => setPlayoffFocus(!playoffFocus)}
-          />{" "}
-          Playoff Focus
+          />
+          <span>Playoff Focus</span>
         </label>
       </div>
 
       {/* Teams */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6 mb-6">
         {[
-          ["Team A", setTeamA],
-          ["Team B", setTeamB],
-          ["Team C", setTeamC]
-        ].map(([label, setter]) => (
-          <div key={label}>
-            <h2 className="font-semibold">{label}</h2>
+          ["Team A", teamA, setTeamA],
+          ["Team B", teamB, setTeamB],
+          ["Team C", teamC, setTeamC]
+        ].map(([label, team, setter]) => (
+          <div key={label} className="border rounded p-4">
+            <h2 className="font-semibold text-lg mb-2">{label}</h2>
             <input
+              className="w-full border rounded p-2 mb-3"
               placeholder="Type player name + Enter"
               onKeyDown={e => {
                 if (e.key === "Enter") {
@@ -215,42 +232,62 @@ export default function App() {
                 }
               }}
             />
+            
+            {/* Display players on this team */}
+            <div className="space-y-1">
+              {team.map(key => {
+                const p = playerIndex[key];
+                return (
+                  <div key={key} className="flex justify-between items-center text-sm bg-gray-100 p-2 rounded">
+                    <span>{p?.Name || key}</span>
+                    <button
+                      onClick={() => removePlayer(key, setter)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>
 
       {/* Category Impact */}
-      <div className="mt-6">
-        <h2 className="font-semibold mb-2">Per-Category Impact</h2>
-        <ul>
+      <div className="mt-6 border rounded p-4">
+        <h2 className="font-semibold text-lg mb-2">Per-Category Impact</h2>
+        <div className="grid grid-cols-3 gap-2">
           {categoryResults.map(r => (
-            <li key={r.cat}>
-              {r.cat}:{" "}
+            <div key={r.cat} className="text-sm">
+              <span className="font-medium">{r.cat}:</span>{" "}
               {r.winners.length > 1
                 ? "⚖️ Tie"
                 : r.winners[0] === "A"
-                ? "⬅️ Team A"
+                ? "Team A"
                 : r.winners[0] === "B"
-                ? "➡️ Team B"
-                : "⬆️ Team C"}
-            </li>
+                ? "Team B"
+                : "Team C"}
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       {/* Verdict Panel */}
-      <div className="mt-6 p-4 border rounded">
-        <h2 className="font-bold text-lg">Trade Verdict</h2>
-        <p>{verdict}</p>
+      <div className="mt-6 p-4 border rounded bg-blue-50">
+        <h2 className="font-bold text-lg mb-2">Trade Verdict</h2>
+        <p className="text-xl mb-4">{verdict}</p>
 
-        {["A", "B", "C"].map(t => (
-          <p key={t} className="text-sm">
-            Team {t} Salary: ${teams[t].salary.toLocaleString()}
-            {teams[t].salary > SALARY_CAP && (
-              <span className="text-red-600"> ⚠ Over Cap</span>
-            )}
-          </p>
-        ))}
+        <div className="space-y-1">
+          {["A", "B", "C"].map(t => (
+            <p key={t} className="text-sm">
+              <span className="font-medium">Team {t} Salary:</span> ${teams[t].salary.toLocaleString()}
+              {teams[t].salary > SALARY_CAP && (
+                <span className="text-red-600 ml-2">⚠ Over Cap</span>
+              )}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );
