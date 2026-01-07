@@ -1,31 +1,6 @@
 import React, { useState, useMemo } from "react";
 
 const SALARY_CAP = 117_600_000;
-const [playoffFocus, setPlayoffFocus] = useState(false);
-
-/* =========================
-   Playoff Category Weights
-========================= */
-const PLAYOFF_WEIGHTS = {
-  G: 1.15,
-  A: 1.0,
-  PTS: 1.0,
-  SOG: 0.85,
-  HIT: 0.85,
-  BLK: 0.85,
-  FOW: 0.85,
-  STP: 1.25,
-  Tk: 1.1,
-
-  W: 1.15,
-  SHO: 1.3,
-  "SV%": 1.1,
-  GAA: 1.1,
-  SV: 0.85,
-  GA: 0.85
-};
-
-
 /* =========================
    League Category Weights
 ========================= */
@@ -216,14 +191,7 @@ export default function App() {
   /* =========================
      Verdict
   ========================= */
-  const weight = playoffFocus ? (PLAYOFF_WEIGHTS[cat] || 1) : 1;
-  totals += value * weight;
-
-  <p className="text-xs text-gray-500 mt-1">
-  Mode: {playoffFocus ? "Playoff Focus (Category Volatility Weighted)" : "Regular Season"}
-  </p>
-
-const totals = results.map(totalValue);
+ const totals = results.map(totalValue);
   const best = Math.max(...totals);
   const winner =
     totals.filter(v => Math.abs(v - best) < 5).length > 1
@@ -283,18 +251,7 @@ const categoryResults = useMemo(() => {
   <label className="flex items-center gap-3 cursor-pointer">
     <span className="text-sm font-medium">Regular Season</span>
 
-    <input
-      type="checkbox"
-      checked={playoffFocus}
-      onChange={() => setPlayoffFocus(!playoffFocus)}
-      className="w-4 h-4"
-    />
-
-    <span className="text-sm font-medium">Playoff Focus</span>
-  </label>
-  </div>
-
-      <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
         {teams.map((t, i) => (
           <div key={i}>
             <h2 className="font-semibold mb-2">{t.name}</h2>
